@@ -1,5 +1,10 @@
 package com.example.demo;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.elasticsearch.action.index.IndexResponse;
+import org.elasticsearch.client.transport.TransportClient;
+import org.elasticsearch.common.xcontent.XContentType;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,11 +18,21 @@ import static org.junit.Assert.*;
 public class ElasticRepoTest {
 
     @Autowired
-    ElasticRepo repo;
+    TransportClient client;
+
+    ObjectMapper objectMapper = new ObjectMapper();
 
     @Test
     public void loads(){
-        assertNotNull(repo);
+        assertNotNull(client);
     }
 
+    @Test
+    public void indexesData() throws JsonProcessingException {
+        SomeModel someModel = new SomeModel("someSector", "someWord");
+        IndexResponse indexResponse = client.prepareIndex("my_index", "my_type")
+                .setSource(objectMapper.writeValueAsString(someModel), XContentType.JSON).get();
+
+        System.out.println(indexResponse);
+    }
 }
